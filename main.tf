@@ -42,6 +42,9 @@ resource "aws_emr_studio" "this" {
   user_role                   = aws_iam_role.emr_service.arn
   vpc_id                      = data.aws_vpc.controltower.id
   workspace_security_group_id = aws_security_group.this.id
+  depends_on = [
+    aws_s3_bucket.this
+  ]
 }
 
 resource "aws_iam_role" "emr_service" {
