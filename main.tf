@@ -104,7 +104,8 @@ data "aws_iam_policy_document" "emr_service" {
       "glue:GetPartitions",
       "glue:CreatePartition",
       "glue:BatchCreatePartition",
-      "glue:GetUserDefinedFunctions"
+      "glue:GetUserDefinedFunctions",
+      "emr-serverless:*"
     ]
     resources = ["*"]
   }
