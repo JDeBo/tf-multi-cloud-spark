@@ -39,7 +39,7 @@ resource "aws_emr_studio" "this" {
   name                        = "mba-studio"
   service_role                = aws_iam_role.emr_service.arn
   subnet_ids                  = data.aws_subnets.controltower.ids
-  user_role                   = aws_iam_role.emr_service.arn
+  user_role                   = aws_iam_role.emr_user.arn
   vpc_id                      = data.aws_vpc.controltower.id
   workspace_security_group_id = aws_security_group.this.id
   depends_on = [
@@ -50,8 +50,13 @@ resource "aws_emr_studio" "this" {
 resource "aws_iam_role" "emr_service" {
   name               = "EMRServiceRole-MBA"
   assume_role_policy = data.aws_iam_policy_document.emr_assume.json
-
 }
+
+resource "aws_iam_role" "emr_user" {
+  name               = "EMRUserRole-MBA"
+  assume_role_policy = data.aws_iam_policy_document.emr_assume.json
+}
+
 data "aws_iam_policy_document" "emr_assume" {
   statement {
     sid     = "emrAssume"
@@ -104,17 +109,34 @@ data "aws_iam_policy_document" "emr_service" {
       "glue:GetPartitions",
       "glue:CreatePartition",
       "glue:BatchCreatePartition",
-      "glue:GetUserDefinedFunctions",
-      "emr-serverless:*"
+      "glue:GetUserDefinedFunctions"
     ]
     resources = ["*"]
   }
 }
 
+data "aws_iam_policy_document" "emr_admin" {
+  statement {
+    sid = "emrAssume"
+    actions = [
+      "emr-serverless:*",
+      "elasticmapreduce:*",
+      "glue:*",
+      "s3:*"
+    ]
+    resources = ["*"]
+  }
+}
 resource "aws_iam_role_policy" "emr_service" {
   name   = "EMRServicePolicy"
   role   = aws_iam_role.emr_service.id
   policy = data.aws_iam_policy_document.emr_service.json
+}
+
+resource "aws_iam_role_policy" "emr_user" {
+  name   = "EMRAdminUserPolicy"
+  role   = aws_iam_role.emr_user.id
+  policy = data.aws_iam_policy_document.emr_user.json
 }
 
 resource "aws_emrserverless_application" "spark" {
