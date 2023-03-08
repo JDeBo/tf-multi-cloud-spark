@@ -20,7 +20,8 @@ data "aws_vpc" "controltower" {
   }
 }
 
-data "aws_subnet" "controltower" {
+# Grab all the public subnet ids
+data "aws_subnet_ids" "controltower" {
   vpc_id = data.aws_vpc.controltower.id
   filter {
     name   = "tag:Name"
@@ -38,7 +39,7 @@ resource "aws_emr_studio" "this" {
   engine_security_group_id    = aws_security_group.this.id
   name                        = "mba-studio"
   service_role                = aws_iam_role.emr_service.arn
-  subnet_ids                  = [data.aws_subnet.controltower.id]
+  subnet_ids                  = data.aws_subnets.controltower.ids
   user_role                   = aws_iam_role.emr_service.arn
   vpc_id                      = data.aws_vpc.controltower.id
   workspace_security_group_id = aws_security_group.this.id
@@ -141,7 +142,7 @@ resource "aws_security_group" "this" {
 resource "aws_vpc_security_group_egress_rule" "this" {
   security_group_id = aws_security_group.this.id
 
-  cidr_ipv4   = data.aws_subnet.controltower.cidr_block
+  cidr_ipv4   = data.aws_vpc.controltower.cidr_block
   from_port   = 0
   ip_protocol = -1
   to_port     = 20000
@@ -150,7 +151,7 @@ resource "aws_vpc_security_group_egress_rule" "this" {
 resource "aws_vpc_security_group_ingress_rule" "this" {
   security_group_id = aws_security_group.this.id
 
-  cidr_ipv4   = data.aws_subnet.controltower.cidr_block
+  cidr_ipv4   = data.aws_vpc.controltower.cidr_block
   from_port   = 0
   ip_protocol = -1
   to_port     = 20000
