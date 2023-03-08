@@ -22,10 +22,9 @@ data "aws_vpc" "controltower" {
 
 # Grab all the public subnet ids
 data "aws_subnets" "controltower" {
-  vpc_id = data.aws_vpc.controltower.id
   filter {
     name   = "tag:Name"
-    values = ["*Public*"] # update for you subnets
+    values = ["*controltower-Private*"] # update for you subnets
   }
   depends_on = [
     data.aws_vpc.controltower
