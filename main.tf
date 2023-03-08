@@ -1,3 +1,16 @@
+terraform {
+  cloud {
+    organization = "jdebo-automation"
+    workspaces {
+      name = "tf-serverless-emr"
+    }
+  }
+}
+
+provider "aws" {
+  region = "us-east-2"
+}
+
 data "aws_caller_identity" "current" {}
 
 data "aws_vpc" "controltower" {
@@ -18,6 +31,7 @@ data "aws_subnet" "controltower" {
   ]
 }
 
+# Base EMR Studio needed to run EMR Serverless Applications
 resource "aws_emr_studio" "this" {
   auth_mode                   = "SSO"
   default_s3_location         = "s3://${aws_s3_bucket.this.bucket}/emr-studio"
@@ -70,8 +84,8 @@ data "aws_iam_policy_document" "emr_service" {
       "s3:DeleteObject"
     ]
     resource = [
-      "arn:aws:s3:::DOC-EXAMPLE-BUCKET",
-      "arn:aws:s3:::DOC-EXAMPLE-BUCKET/*"
+      "arn:aws:s3:::emr-backend-*", # isolate access to EMR buckets
+      "arn:aws:s3:::emr-backend-*/*"
     ]
   }
   statement {
