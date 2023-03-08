@@ -64,11 +64,11 @@ data "aws_iam_policy_document" "emr_service" {
   statement {
     sid    = "ReadAccessForEMRSamples"
     effect = "Allow"
-    action = [
+    actions = [
       "s3:GetObject",
       "s3:ListBucket"
     ]
-    resource = [
+    resources = [
       "arn:aws:s3:::*.elasticmapreduce",
       "arn:aws:s3:::*.elasticmapreduce/*"
     ]
@@ -77,13 +77,13 @@ data "aws_iam_policy_document" "emr_service" {
   statement {
     sid    = "FullAccessToOutputBucket"
     effect = "Allow"
-    action = [
+    actions = [
       "s3:PutObject",
       "s3:GetObject",
       "s3:ListBucket",
       "s3:DeleteObject"
     ]
-    resource = [
+    resources = [
       "arn:aws:s3:::emr-backend-*", # isolate access to EMR buckets
       "arn:aws:s3:::emr-backend-*/*"
     ]
@@ -91,7 +91,7 @@ data "aws_iam_policy_document" "emr_service" {
   statement {
     sid    = "GlueCreateAndReadDataCatalog"
     effect = "Allow"
-    action = [
+    actions = [
       "glue:GetDatabase",
       "glue:CreateDatabase",
       "glue:GetDataBases",
@@ -106,7 +106,7 @@ data "aws_iam_policy_document" "emr_service" {
       "glue:BatchCreatePartition",
       "glue:GetUserDefinedFunctions"
     ]
-    resource = ["*"]
+    resources = ["*"]
   }
 }
 
