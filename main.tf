@@ -115,7 +115,7 @@ data "aws_iam_policy_document" "emr_service" {
   }
 }
 
-data "aws_iam_policy_document" "emr_admin" {
+data "aws_iam_policy_document" "emr_user" {
   statement {
     sid = "emrAssume"
     actions = [
