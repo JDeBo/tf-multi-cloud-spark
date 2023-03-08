@@ -21,7 +21,7 @@ data "aws_vpc" "controltower" {
 }
 
 # Grab all the public subnet ids
-data "aws_subnet_ids" "controltower" {
+data "aws_subnets" "controltower" {
   vpc_id = data.aws_vpc.controltower.id
   filter {
     name   = "tag:Name"
