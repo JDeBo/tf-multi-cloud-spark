@@ -119,10 +119,7 @@ data "aws_iam_policy_document" "emr_user" {
   statement {
     sid = "emrAssume"
     actions = [
-      "emr-serverless:*",
-      "elasticmapreduce:*",
-      "glue:*",
-      "s3:*"
+      "*"
     ]
     resources = ["*"]
   }
