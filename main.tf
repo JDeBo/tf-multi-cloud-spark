@@ -82,11 +82,7 @@ module "emr_studio_sso" {
       "glue:CreatePartition",
       "glue:BatchCreatePartition",
       "glue:GetUserDefinedFunctions",
-      "elasticmapreduce:DescribeEditor", 
-      "elasticmapreduce:ListEditors",
-      "elasticmapreduce:StartEditor", 
-      "elasticmapreduce:StopEditor",
-      "elasticmapreduce:OpenEditorInConsole"
+      "elasticmapreduce:*Editor*", # Editor Roles
     ]
     resources = ["*"]
   },
