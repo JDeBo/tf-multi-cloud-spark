@@ -42,7 +42,7 @@ module "emr_studio_sso" {
   name                = "${local.name}-studio"
   description         = "EMR Studio using SSO authentication"
   auth_mode           = "SSO"
-  default_s3_location = "s3://${aws_s3_bucket.this.bucket}/emr-studio"
+  default_s3_location = "s3://${module.s3_bucket.s3_bucket_id}/complete"
 
   vpc_id     = data.aws_vpc.controltower.id
   subnet_ids = data.aws_subnets.controltower.ids
