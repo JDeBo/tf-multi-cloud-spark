@@ -11,6 +11,9 @@ provider "aws" {
   region = "us-east-2"
 }
 
+locals {
+  name = "mba"
+}
 data "aws_caller_identity" "current" {}
 
 data "aws_vpc" "controltower" {
@@ -36,7 +39,7 @@ module "emr_studio_sso" {
   source = "terraform-aws-modules/emr/aws//modules/studio"
 
 
-  name                = "mba-studio"
+  name                = "${local.name}-studio"
   description         = "EMR Studio using SSO authentication"
   auth_mode           = "SSO"
   default_s3_location = "s3://${aws_s3_bucket.this.bucket}/emr-studio"
@@ -51,6 +54,25 @@ module "emr_studio_sso" {
       identity_id   = var.user_identity
     }
   }
+
+  service_role_name        = "${local.name}-complete-service"
+  service_role_path        = "/complete/"
+  service_role_description = "EMR Studio complete service role"
+  service_role_tags        = { service = true }
+  service_role_s3_bucket_arns = [
+    module.s3_bucket.s3_bucket_arn,
+    "${module.s3_bucket.s3_bucket_arn}/complete/*}"
+  ]
+
+  # User role
+  user_role_name        = "${local.name}-complete-user"
+  user_role_path        = "/complete/"
+  user_role_description = "EMR Studio complete user role"
+  user_role_tags        = { user = true }
+  user_role_s3_bucket_arns = [
+    module.s3_bucket.s3_bucket_arn,
+    "${module.s3_bucket.s3_bucket_arn}/complete/*}"
+  ]
 }
 
 # resource "aws_emr_studio" "this" {
