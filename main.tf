@@ -50,7 +50,7 @@ resource "aws_emr_studio" "this" {
 resource "aws_emr_studio_session_mapping" "admin" {
   studio_id          = aws_emr_studio.this.id
   identity_type      = "USER"
-  identity_name      = var.user_identity
+  identity_id        = var.user_identity
   session_policy_arn = aws_iam_policy.emr_admin.arn
 }
 
