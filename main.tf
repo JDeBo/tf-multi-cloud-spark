@@ -66,7 +66,7 @@ module "emr_studio_sso" {
 
   service_role_statements = {
   glue = {
-    sid    = "GlueCreateAndReadDataCatalog"
+    sid    = "GlueandWorkspace"
     effect = "Allow"
     actions = [
       "glue:GetDatabase",
@@ -81,7 +81,12 @@ module "emr_studio_sso" {
       "glue:GetPartitions",
       "glue:CreatePartition",
       "glue:BatchCreatePartition",
-      "glue:GetUserDefinedFunctions"
+      "glue:GetUserDefinedFunctions",
+      "elasticmapreduce:DescribeEditor", 
+      "elasticmapreduce:ListEditors",
+      "elasticmapreduce:StartEditor", 
+      "elasticmapreduce:StopEditor",
+      "elasticmapreduce:OpenEditorInConsole"
     ]
     resources = ["*"]
   },
