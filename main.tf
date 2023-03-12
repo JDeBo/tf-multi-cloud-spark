@@ -64,6 +64,40 @@ module "emr_studio_sso" {
     "${module.s3_bucket.s3_bucket_arn}/complete/*}"
   ]
 
+  service_role_statements = {
+  glue = {
+    sid    = "GlueCreateAndReadDataCatalog"
+    effect = "Allow"
+    actions = [
+      "glue:GetDatabase",
+      "glue:CreateDatabase",
+      "glue:GetDataBases",
+      "glue:CreateTable",
+      "glue:GetTable",
+      "glue:UpdateTable",
+      "glue:DeleteTable",
+      "glue:GetTables",
+      "glue:GetPartition",
+      "glue:GetPartitions",
+      "glue:CreatePartition",
+      "glue:BatchCreatePartition",
+      "glue:GetUserDefinedFunctions"
+    ]
+    resources = ["*"]
+  },
+  emr_samples = {
+    sid    = "ReadAccessForEMRSamples"
+    effect = "Allow"
+    actions = [
+      "s3:GetObject",
+      "s3:ListBucket"
+    ]
+    resources = [
+      "arn:aws:s3:::*.elasticmapreduce",
+      "arn:aws:s3:::*.elasticmapreduce/*"
+    ]
+  }
+  }
   # User role
   user_role_name        = "${local.name}-complete-user"
   user_role_path        = "/complete/"
@@ -118,52 +152,52 @@ module "emr_studio_sso" {
 #   }
 # }
 
-# data "aws_iam_policy_document" "emr_service" {
-#   statement {
-#     sid    = "ReadAccessForEMRSamples"
-#     effect = "Allow"
-#     actions = [
-#       "s3:GetObject",
-#       "s3:ListBucket"
-#     ]
-#     resources = [
-#       "arn:aws:s3:::*.elasticmapreduce",
-#       "arn:aws:s3:::*.elasticmapreduce/*"
-#     ]
-#   }
+data "aws_iam_policy_document" "emr_service" {
+  statement {
+    sid    = "ReadAccessForEMRSamples"
+    effect = "Allow"
+    actions = [
+      "s3:GetObject",
+      "s3:ListBucket"
+    ]
+    resources = [
+      "arn:aws:s3:::*.elasticmapreduce",
+      "arn:aws:s3:::*.elasticmapreduce/*"
+    ]
+  }
 
-#   statement {
-#     sid    = "FullAccessToOutputBucket"
-#     effect = "Allow"
-#     actions = [
-#       "s3:*"
-#     ]
-#     resources = [
-#       "arn:aws:s3:::emr-backend-*", # isolate access to EMR buckets
-#       "arn:aws:s3:::emr-backend-*/*"
-#     ]
-#   }
-#   statement {
-#     sid    = "GlueCreateAndReadDataCatalog"
-#     effect = "Allow"
-#     actions = [
-#       "glue:GetDatabase",
-#       "glue:CreateDatabase",
-#       "glue:GetDataBases",
-#       "glue:CreateTable",
-#       "glue:GetTable",
-#       "glue:UpdateTable",
-#       "glue:DeleteTable",
-#       "glue:GetTables",
-#       "glue:GetPartition",
-#       "glue:GetPartitions",
-#       "glue:CreatePartition",
-#       "glue:BatchCreatePartition",
-#       "glue:GetUserDefinedFunctions"
-#     ]
-#     resources = ["*"]
-#   }
-# }
+  statement {
+    sid    = "FullAccessToOutputBucket"
+    effect = "Allow"
+    actions = [
+      "s3:*"
+    ]
+    resources = [
+      "arn:aws:s3:::emr-backend-*", # isolate access to EMR buckets
+      "arn:aws:s3:::emr-backend-*/*"
+    ]
+  }
+  statement {
+    sid    = "GlueCreateAndReadDataCatalog"
+    effect = "Allow"
+    actions = [
+      "glue:GetDatabase",
+      "glue:CreateDatabase",
+      "glue:GetDataBases",
+      "glue:CreateTable",
+      "glue:GetTable",
+      "glue:UpdateTable",
+      "glue:DeleteTable",
+      "glue:GetTables",
+      "glue:GetPartition",
+      "glue:GetPartitions",
+      "glue:CreatePartition",
+      "glue:BatchCreatePartition",
+      "glue:GetUserDefinedFunctions"
+    ]
+    resources = ["*"]
+  }
+}
 
 # data "aws_iam_policy_document" "emr_user" {
 #   statement {
