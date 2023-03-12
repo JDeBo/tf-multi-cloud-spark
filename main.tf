@@ -24,7 +24,7 @@ data "aws_vpc" "controltower" {
 data "aws_subnets" "controltower" {
   filter {
     name   = "tag:Name"
-    values = ["*controltower-Private*"] # update for you subnets
+    values = ["*Public*"] # update for you subnets
   }
   depends_on = [
     data.aws_vpc.controltower
