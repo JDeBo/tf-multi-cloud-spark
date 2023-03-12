@@ -32,121 +32,142 @@ data "aws_subnets" "controltower" {
 }
 
 # Base EMR Studio needed to run EMR Serverless Applications
-resource "aws_emr_studio" "this" {
-  auth_mode                   = "SSO"
-  default_s3_location         = "s3://${aws_s3_bucket.this.bucket}/emr-studio"
-  engine_security_group_id    = aws_security_group.this.id
-  name                        = "mba-studio"
-  service_role                = aws_iam_role.emr_service.arn
-  subnet_ids                  = data.aws_subnets.controltower.ids
-  user_role                   = aws_iam_role.emr_user.arn
-  vpc_id                      = data.aws_vpc.controltower.id
-  workspace_security_group_id = aws_security_group.this.id
-  depends_on = [
-    aws_s3_bucket.this
-  ]
-}
+module "emr_studio_sso" {
+  source = "terraform-aws-modules/emr/aws//modules/studio"
 
-resource "aws_emr_studio_session_mapping" "admin" {
-  studio_id          = aws_emr_studio.this.id
-  identity_type      = "USER"
-  identity_id        = var.user_identity
-  session_policy_arn = aws_iam_policy.emr_admin.arn
-}
 
-resource "aws_iam_role" "emr_service" {
-  name               = "EMRServiceRole-MBA"
-  assume_role_policy = data.aws_iam_policy_document.emr_assume.json
-}
+  name                = "mba-studio"
+  description         = "EMR Studio using SSO authentication"
+  auth_mode           = "SSO"
+  default_s3_location = "s3://${aws_s3_bucket.this.bucket}/emr-studio"
 
-resource "aws_iam_role" "emr_user" {
-  name               = "EMRUserRole-MBA"
-  assume_role_policy = data.aws_iam_policy_document.emr_assume.json
-}
+  vpc_id     = data.aws_vpc.controltower.id
+  subnet_ids = data.aws_subnets.controltower.ids
 
-data "aws_iam_policy_document" "emr_assume" {
-  statement {
-    sid     = "emrAssume"
-    actions = ["sts:AssumeRole"]
-    principals {
-      type        = "Service"
-      identifiers = ["elasticmapreduce.amazonaws.com"]
+  # SSO Mapping
+  session_mappings = {
+    admin_user = {
+      identity_type = "USER"
+      identity_id   = var.user_identity
     }
   }
 }
 
-data "aws_iam_policy_document" "emr_service" {
-  statement {
-    sid    = "ReadAccessForEMRSamples"
-    effect = "Allow"
-    actions = [
-      "s3:GetObject",
-      "s3:ListBucket"
-    ]
-    resources = [
-      "arn:aws:s3:::*.elasticmapreduce",
-      "arn:aws:s3:::*.elasticmapreduce/*"
-    ]
-  }
+# resource "aws_emr_studio" "this" {
+#   auth_mode                   = "SSO"
+#   default_s3_location         = "s3://${aws_s3_bucket.this.bucket}/emr-studio"
+#   engine_security_group_id    = aws_security_group.this.id
+#   name                        = "mba-studio"
+#   service_role                = aws_iam_role.emr_service.arn
+#   subnet_ids                  = data.aws_subnets.controltower.ids
+#   user_role                   = aws_iam_role.emr_user.arn
+#   vpc_id                      = data.aws_vpc.controltower.id
+#   workspace_security_group_id = aws_security_group.this.id
+#   depends_on = [
+#     aws_s3_bucket.this
+#   ]
+# }
 
-  statement {
-    sid    = "FullAccessToOutputBucket"
-    effect = "Allow"
-    actions = [
-      "s3:*"
-    ]
-    resources = [
-      "arn:aws:s3:::emr-backend-*", # isolate access to EMR buckets
-      "arn:aws:s3:::emr-backend-*/*"
-    ]
-  }
-  statement {
-    sid    = "GlueCreateAndReadDataCatalog"
-    effect = "Allow"
-    actions = [
-      "glue:GetDatabase",
-      "glue:CreateDatabase",
-      "glue:GetDataBases",
-      "glue:CreateTable",
-      "glue:GetTable",
-      "glue:UpdateTable",
-      "glue:DeleteTable",
-      "glue:GetTables",
-      "glue:GetPartition",
-      "glue:GetPartitions",
-      "glue:CreatePartition",
-      "glue:BatchCreatePartition",
-      "glue:GetUserDefinedFunctions"
-    ]
-    resources = ["*"]
-  }
-}
+# resource "aws_emr_studio_session_mapping" "admin" {
+#   studio_id          = aws_emr_studio.this.id
+#   identity_type      = "USER"
+#   identity_id        = var.user_identity
+#   session_policy_arn = aws_iam_policy.emr_admin.arn
+# }
 
-data "aws_iam_policy_document" "emr_user" {
-  statement {
-    sid = "emrUser"
-    actions = [
-      "*"
-    ]
-    resources = ["*"]
-  }
-}
-resource "aws_iam_role_policy" "emr_service" {
-  name   = "EMRServicePolicy"
-  role   = aws_iam_role.emr_service.id
-  policy = data.aws_iam_policy_document.emr_service.json
-}
+# resource "aws_iam_role" "emr_service" {
+#   name               = "EMRServiceRole-MBA"
+#   assume_role_policy = data.aws_iam_policy_document.emr_assume.json
+# }
 
-resource "aws_iam_role_policy" "emr_user" {
-  name   = "EMRAdminUserPolicy"
-  role   = aws_iam_role.emr_user.id
-  policy = data.aws_iam_policy_document.emr_user.json
-}
+# resource "aws_iam_role" "emr_user" {
+#   name               = "EMRUserRole-MBA"
+#   assume_role_policy = data.aws_iam_policy_document.emr_assume.json
+# }
 
-resource "aws_iam_policy" "emr_admin" {
-  name   = "EMRAdminSessionPolicy"
-  policy = data.aws_iam_policy_document.emr_user.json
-}
+# data "aws_iam_policy_document" "emr_assume" {
+#   statement {
+#     sid     = "emrAssume"
+#     actions = ["sts:AssumeRole"]
+#     principals {
+#       type        = "Service"
+#       identifiers = ["elasticmapreduce.amazonaws.com"]
+#     }
+#   }
+# }
+
+# data "aws_iam_policy_document" "emr_service" {
+#   statement {
+#     sid    = "ReadAccessForEMRSamples"
+#     effect = "Allow"
+#     actions = [
+#       "s3:GetObject",
+#       "s3:ListBucket"
+#     ]
+#     resources = [
+#       "arn:aws:s3:::*.elasticmapreduce",
+#       "arn:aws:s3:::*.elasticmapreduce/*"
+#     ]
+#   }
+
+#   statement {
+#     sid    = "FullAccessToOutputBucket"
+#     effect = "Allow"
+#     actions = [
+#       "s3:*"
+#     ]
+#     resources = [
+#       "arn:aws:s3:::emr-backend-*", # isolate access to EMR buckets
+#       "arn:aws:s3:::emr-backend-*/*"
+#     ]
+#   }
+#   statement {
+#     sid    = "GlueCreateAndReadDataCatalog"
+#     effect = "Allow"
+#     actions = [
+#       "glue:GetDatabase",
+#       "glue:CreateDatabase",
+#       "glue:GetDataBases",
+#       "glue:CreateTable",
+#       "glue:GetTable",
+#       "glue:UpdateTable",
+#       "glue:DeleteTable",
+#       "glue:GetTables",
+#       "glue:GetPartition",
+#       "glue:GetPartitions",
+#       "glue:CreatePartition",
+#       "glue:BatchCreatePartition",
+#       "glue:GetUserDefinedFunctions"
+#     ]
+#     resources = ["*"]
+#   }
+# }
+
+# data "aws_iam_policy_document" "emr_user" {
+#   statement {
+#     sid = "emrUser"
+#     actions = [
+#       "*"
+#     ]
+#     resources = ["*"]
+#   }
+# }
+# resource "aws_iam_role_policy" "emr_service" {
+#   name   = "EMRServicePolicy"
+#   role   = aws_iam_role.emr_service.id
+#   policy = data.aws_iam_policy_document.emr_service.json
+# }
+
+# resource "aws_iam_role_policy" "emr_user" {
+#   name   = "EMRAdminUserPolicy"
+#   role   = aws_iam_role.emr_user.id
+#   policy = data.aws_iam_policy_document.emr_user.json
+# }
+
+# resource "aws_iam_policy" "emr_admin" {
+#   name   = "EMRAdminSessionPolicy"
+#   policy = data.aws_iam_policy_document.emr_user.json
+# }
 
 resource "aws_emrserverless_application" "spark" {
   name          = "spark"
