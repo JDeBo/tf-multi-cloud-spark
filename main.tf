@@ -197,14 +197,31 @@ resource "aws_emrserverless_application" "spark" {
   type          = "spark"
 }
 
-resource "aws_s3_bucket" "this" {
-  bucket = "emr-backend-${data.aws_caller_identity.current.account_id}"
+module "s3_bucket" {
+  source  = "terraform-aws-modules/s3-bucket/aws"
+  version = "~> v3.0"
 
-}
+  bucket_prefix = "${local.name}-emr-"
 
-resource "aws_s3_bucket_acl" "this" {
-  bucket = aws_s3_bucket.this.id
-  acl    = "private"
+  # Allow deletion of non-empty bucket
+  # Example usage only - not recommended for production
+  force_destroy = true
+
+  attach_deny_insecure_transport_policy = true
+  attach_require_latest_tls_policy      = true
+
+  block_public_acls       = true
+  block_public_policy     = true
+  ignore_public_acls      = true
+  restrict_public_buckets = true
+
+  server_side_encryption_configuration = {
+    rule = {
+      apply_server_side_encryption_by_default = {
+        sse_algorithm = "AES256"
+      }
+    }
+  }
 }
 
 resource "aws_security_group" "this" {
