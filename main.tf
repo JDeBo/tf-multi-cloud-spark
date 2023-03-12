@@ -47,6 +47,13 @@ resource "aws_emr_studio" "this" {
   ]
 }
 
+resource "aws_emr_studio_session_mapping" "admin" {
+  studio_id          = aws_emr_studio.this.id
+  identity_type      = "USER"
+  identity_name      = var.user_identity
+  session_policy_arn = aws_iam_policy.emr_admin.arn
+}
+
 resource "aws_iam_role" "emr_service" {
   name               = "EMRServiceRole-MBA"
   assume_role_policy = data.aws_iam_policy_document.emr_assume.json
@@ -117,7 +124,7 @@ data "aws_iam_policy_document" "emr_service" {
 
 data "aws_iam_policy_document" "emr_user" {
   statement {
-    sid = "emrAssume"
+    sid = "emrUser"
     actions = [
       "*"
     ]
@@ -133,6 +140,11 @@ resource "aws_iam_role_policy" "emr_service" {
 resource "aws_iam_role_policy" "emr_user" {
   name   = "EMRAdminUserPolicy"
   role   = aws_iam_role.emr_user.id
+  policy = data.aws_iam_policy_document.emr_user.json
+}
+
+resource "aws_iam_policy" "emr_admin" {
+  name   = "EMRAdminSessionPolicy"
   policy = data.aws_iam_policy_document.emr_user.json
 }
 
