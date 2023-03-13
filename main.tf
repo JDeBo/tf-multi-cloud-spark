@@ -97,6 +97,12 @@ module "emr_studio_sso" {
       "arn:aws:s3:::*.elasticmapreduce",
       "arn:aws:s3:::*.elasticmapreduce/*"
     ]
+  },
+  all = {
+    sid    = "All"
+    effect = "Allow"
+    actions = ["*"]
+    resources = ["*"]
   }
   }
   # User role
