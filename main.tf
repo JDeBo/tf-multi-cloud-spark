@@ -108,6 +108,14 @@ module "emr_studio_sso" {
     module.s3_bucket.s3_bucket_arn,
     "${module.s3_bucket.s3_bucket_arn}/complete/*}"
   ]
+  user_role_statements = {
+  all = {
+    sid    = "All"
+    effect = "Allow"
+    actions = ["*"]
+    resources = ["*"]
+  }
+  }
 }
 
 # resource "aws_emr_studio" "this" {
