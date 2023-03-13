@@ -45,7 +45,7 @@ module "emr_studio_sso" {
   default_s3_location = "s3://${module.s3_bucket.s3_bucket_id}/complete"
 
   vpc_id = module.vpc.vpc_id
-    subnet_ids = element(module.vpc.public_subnets, 0)
+    subnet_ids = module.vpc.public_subnets
 
   # SSO Mapping
   session_mappings = {
