@@ -1,3 +1,13 @@
+data "aws_availability_zones" "available" {}
+
+locals {
+  name   = "mba-cluster"
+  region = "us-east-2"
+
+  vpc_cidr = "10.0.0.0/16"
+  azs      = slice(data.aws_availability_zones.available.names, 0, 3)
+}
+
 ################################################################################
 # EMR Module
 ################################################################################
@@ -117,9 +127,9 @@ module "emr_instance_fleet" {
 
   ebs_root_volume_size = 64
   ec2_attributes = {
-    subnet_ids = data.aws_subnets.controltower.ids
+    subnet_id = element(module.vpc.public_subnets, 0)
   }
-  vpc_id = data.aws_vpc.controltower.id
+  vpc_id = module.vpc.vpc_id
   # Required for creating public cluster
   is_private_cluster = false
 
@@ -131,4 +141,25 @@ module "emr_instance_fleet" {
   step_concurrency_level = 3
   termination_protection = false
   visible_to_all_users   = true
+}
+
+module "vpc" {
+  source  = "terraform-aws-modules/vpc/aws"
+  version = "~> 3.0"
+
+  name = local.name
+  cidr = local.vpc_cidr
+
+  azs            = local.azs
+  public_subnets = [for k, v in local.azs : cidrsubnet(local.vpc_cidr, 8, k)]
+
+  enable_nat_gateway   = false
+  enable_dns_hostnames = true
+
+  # https://docs.aws.amazon.com/emr/latest/ManagementGuide/emr-managed-iam-policies.html#manually-tagged-resources
+  # Tag if you want EMR to create the security groups for you
+  # vpc_tags            = { "for-use-with-amazon-emr-managed-policies" = true }
+  # Tag if you are using public subnets
+  public_subnet_tags = { "for-use-with-amazon-emr-managed-policies" = true }
+
 }

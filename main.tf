@@ -16,23 +16,23 @@ locals {
 }
 data "aws_caller_identity" "current" {}
 
-data "aws_vpc" "controltower" {
-  filter {
-    name   = "tag:Name"
-    values = ["*controltower*"] #replace if you aren't using control tower
-  }
-}
+# data "aws_vpc" "controltower" {
+#   filter {
+#     name   = "tag:Name"
+#     values = ["*controltower*"] #replace if you aren't using control tower
+#   }
+# }
 
-# Grab all the public subnet ids
-data "aws_subnets" "controltower" {
-  filter {
-    name   = "tag:Name"
-    values = ["*Public*"] # update for you subnets
-  }
-  depends_on = [
-    data.aws_vpc.controltower
-  ]
-}
+# # Grab all the public subnet ids
+# data "aws_subnets" "controltower" {
+#   filter {
+#     name   = "tag:Name"
+#     values = ["*Public*"] # update for you subnets
+#   }
+#   depends_on = [
+#     data.aws_vpc.controltower
+#   ]
+# }
 
 # Base EMR Studio needed to run EMR Serverless Applications
 module "emr_studio_sso" {
@@ -44,8 +44,8 @@ module "emr_studio_sso" {
   auth_mode           = "SSO"
   default_s3_location = "s3://${module.s3_bucket.s3_bucket_id}/complete"
 
-  vpc_id     = data.aws_vpc.controltower.id
-  subnet_ids = data.aws_subnets.controltower.ids
+  vpc_id = module.vpc.vpc_id
+    subnet_ids = element(module.vpc.public_subnets, 0)
 
   # SSO Mapping
   session_mappings = {
@@ -276,13 +276,13 @@ module "s3_bucket" {
 resource "aws_security_group" "this" {
   name        = "emr"
   description = "Allow EMR traffic"
-  vpc_id      = data.aws_vpc.controltower.id
+  vpc_id      = module.vpc.vpc_id
 }
 
 resource "aws_vpc_security_group_egress_rule" "this" {
   security_group_id = aws_security_group.this.id
 
-  cidr_ipv4   = data.aws_vpc.controltower.cidr_block
+  cidr_ipv4   = module.vpc.vpc_id
   from_port   = -1
   ip_protocol = -1
   to_port     = -1
@@ -291,7 +291,7 @@ resource "aws_vpc_security_group_egress_rule" "this" {
 resource "aws_vpc_security_group_ingress_rule" "this" {
   security_group_id = aws_security_group.this.id
 
-  cidr_ipv4   = data.aws_vpc.controltower.cidr_block
+  cidr_ipv4   = module.vpc.vpc_id
   from_port   = -1
   ip_protocol = -1
   to_port     = -1
