@@ -45,7 +45,7 @@ module "emr_instance_fleet" {
     target_on_demand_capacity = 1
     instance_type_configs = [
       {
-        instance_type = "m5.large"
+        instance_type = "m5.xlarge"
       }
     ]
   }
