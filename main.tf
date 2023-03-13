@@ -44,8 +44,8 @@ module "emr_studio_sso" {
   auth_mode           = "SSO"
   default_s3_location = "s3://${module.s3_bucket.s3_bucket_id}/complete"
 
-  vpc_id = module.vpc.vpc_id
-    subnet_ids = module.vpc.public_subnets
+  vpc_id     = module.vpc.vpc_id
+  subnet_ids = module.vpc.public_subnets
 
   # SSO Mapping
   session_mappings = {
@@ -65,45 +65,53 @@ module "emr_studio_sso" {
   ]
 
   service_role_statements = {
-  glue = {
-    sid    = "GlueandWorkspace"
-    effect = "Allow"
-    actions = [
-      "glue:GetDatabase",
-      "glue:CreateDatabase",
-      "glue:GetDataBases",
-      "glue:CreateTable",
-      "glue:GetTable",
-      "glue:UpdateTable",
-      "glue:DeleteTable",
-      "glue:GetTables",
-      "glue:GetPartition",
-      "glue:GetPartitions",
-      "glue:CreatePartition",
-      "glue:BatchCreatePartition",
-      "glue:GetUserDefinedFunctions",
-      "elasticmapreduce:*", # Editor Roles
-    ]
-    resources = ["*"]
-  },
-  emr_samples = {
-    sid    = "ReadAccessForEMRSamples"
-    effect = "Allow"
-    actions = [
-      "s3:GetObject",
-      "s3:ListBucket"
-    ]
-    resources = [
-      "arn:aws:s3:::*.elasticmapreduce",
-      "arn:aws:s3:::*.elasticmapreduce/*"
-    ]
-  },
-  all = {
-    sid    = "All"
-    effect = "Allow"
-    actions = ["*"]
-    resources = ["*"]
-  }
+    glue_assume = {
+      sid     = "emrAssume"
+      actions = ["sts:AssumeRole"]
+      principals = {
+        type        = "Service"
+        identifiers = ["glue.amazonaws.com"]
+      }
+    },
+    glue = {
+      sid    = "GlueandWorkspace"
+      effect = "Allow"
+      actions = [
+        "glue:GetDatabase",
+        "glue:CreateDatabase",
+        "glue:GetDataBases",
+        "glue:CreateTable",
+        "glue:GetTable",
+        "glue:UpdateTable",
+        "glue:DeleteTable",
+        "glue:GetTables",
+        "glue:GetPartition",
+        "glue:GetPartitions",
+        "glue:CreatePartition",
+        "glue:BatchCreatePartition",
+        "glue:GetUserDefinedFunctions",
+        "elasticmapreduce:*", # Editor Roles
+      ]
+      resources = ["*"]
+    },
+    emr_samples = {
+      sid    = "ReadAccessForEMRSamples"
+      effect = "Allow"
+      actions = [
+        "s3:GetObject",
+        "s3:ListBucket"
+      ]
+      resources = [
+        "arn:aws:s3:::*.elasticmapreduce",
+        "arn:aws:s3:::*.elasticmapreduce/*"
+      ]
+    },
+    all = {
+      sid       = "All"
+      effect    = "Allow"
+      actions   = ["*"]
+      resources = ["*"]
+    }
   }
   # User role
   user_role_name        = "${local.name}-complete-user"
@@ -115,12 +123,12 @@ module "emr_studio_sso" {
     "${module.s3_bucket.s3_bucket_arn}/complete/*}"
   ]
   user_role_statements = {
-  all = {
-    sid    = "All"
-    effect = "Allow"
-    actions = ["*"]
-    resources = ["*"]
-  }
+    all = {
+      sid       = "All"
+      effect    = "Allow"
+      actions   = ["*"]
+      resources = ["*"]
+    }
   }
 }
 
