@@ -48,11 +48,14 @@ module "emr_instance_fleet" {
       ],
       "Properties" : {}
     },
-        { "Classification" : "spark-defaults",
-          "Properties" : {
-            "spark.driver.memoryOverhead" : "2048",
-          "spark.executor.memoryOverhead" : "2048" }
-        }
+    { "Classification" : "spark-defaults",
+      "Properties" : {
+        "spark.driver.memoryOverhead" : "2g",
+        "spark.executor.memoryOverhead" : "2g",
+        "spark.executor.memory" : "1g",
+        "spark.driver.memory" : "1g"
+      }
+    }
   ])
 
   master_instance_fleet = {
@@ -61,7 +64,7 @@ module "emr_instance_fleet" {
     target_spot_capacity      = 1
     instance_type_configs = [
       {
-        instance_type = "m4.large"
+        instance_type = "m5.xlarge"
       }
     ]
   }
@@ -71,10 +74,6 @@ module "emr_instance_fleet" {
     target_on_demand_capacity = 0
     target_spot_capacity      = 2
     instance_type_configs = [
-      {
-        instance_type     = "c4.large"
-        weighted_capacity = 1
-      },
       {
         bid_price_as_percentage_of_on_demand_price = 100
         ebs_config = {
@@ -106,10 +105,6 @@ module "emr_instance_fleet" {
     target_on_demand_capacity = 0
     target_spot_capacity      = 2
     instance_type_configs = [
-      {
-        instance_type     = "c4.large"
-        weighted_capacity = 1
-      },
       {
         bid_price_as_percentage_of_on_demand_price = 100
         ebs_config = {
