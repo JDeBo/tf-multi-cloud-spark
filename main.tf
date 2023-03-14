@@ -65,14 +65,14 @@ module "emr_studio_sso" {
   ]
 
   service_role_statements = {
-    glue_assume = {
-      sid     = "emrAssume"
-      actions = ["sts:AssumeRole"]
-      principals = {
-        type        = "Service"
-        identifiers = ["glue.amazonaws.com"]
-      }
-    },
+    # glue_assume = {
+    #   sid     = "emrAssume"
+    #   actions = ["sts:AssumeRole"]
+    #   principals {
+    #     type        = "Service"
+    #     identifiers = ["glue.amazonaws.com"]
+    #   }
+    # },
     glue = {
       sid    = "GlueandWorkspace"
       effect = "Allow"
