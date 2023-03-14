@@ -154,28 +154,28 @@ module "emr_studio_sso" {
 #   session_policy_arn = aws_iam_policy.emr_admin.arn
 # }
 
-# resource "aws_iam_role" "emr_service" {
-#   name               = "EMRServiceRole-MBA"
-#   assume_role_policy = data.aws_iam_policy_document.emr_assume.json
-# }
+resource "aws_iam_role" "glue_service" {
+  name               = "GlueServiceRole-MBA"
+  assume_role_policy = data.aws_iam_policy_document.glue_assume.json
+}
 
 # resource "aws_iam_role" "emr_user" {
 #   name               = "EMRUserRole-MBA"
 #   assume_role_policy = data.aws_iam_policy_document.emr_assume.json
 # }
 
-# data "aws_iam_policy_document" "emr_assume" {
-#   statement {
-#     sid     = "emrAssume"
-#     actions = ["sts:AssumeRole"]
-#     principals {
-#       type        = "Service"
-#       identifiers = ["elasticmapreduce.amazonaws.com"]
-#     }
-#   }
-# }
+data "aws_iam_policy_document" "glue_assume" {
+  statement {
+    sid     = "emrAssume"
+    actions = ["sts:AssumeRole"]
+    principals {
+      type        = "Service"
+      identifiers = ["glue.amazonaws.com"]
+    }
+  }
+}
 
-data "aws_iam_policy_document" "emr_service" {
+data "aws_iam_policy_document" "glue_service" {
   statement {
     sid    = "ReadAccessForEMRSamples"
     effect = "Allow"
@@ -216,7 +216,7 @@ data "aws_iam_policy_document" "emr_service" {
       "glue:GetPartitions",
       "glue:CreatePartition",
       "glue:BatchCreatePartition",
-      "glue:GetUserDefinedFunctions"
+      "glue:*"
     ]
     resources = ["*"]
   }
@@ -231,11 +231,11 @@ data "aws_iam_policy_document" "emr_service" {
 #     resources = ["*"]
 #   }
 # }
-# resource "aws_iam_role_policy" "emr_service" {
-#   name   = "EMRServicePolicy"
-#   role   = aws_iam_role.emr_service.id
-#   policy = data.aws_iam_policy_document.emr_service.json
-# }
+resource "aws_iam_role_policy" "glue_service" {
+  name   = "GlueServicePolicy"
+  role   = aws_iam_role.glue_service.id
+  policy = data.aws_iam_policy_document.glue_service.json
+}
 
 # resource "aws_iam_role_policy" "emr_user" {
 #   name   = "EMRAdminUserPolicy"
@@ -290,7 +290,7 @@ resource "aws_security_group" "this" {
 resource "aws_vpc_security_group_egress_rule" "this" {
   security_group_id = aws_security_group.this.id
 
-  cidr_ipv4   = module.vpc.vpc_id
+  cidr_ipv4   = module.vpc.vpc_cidr_block
   from_port   = -1
   ip_protocol = -1
   to_port     = -1
@@ -299,7 +299,7 @@ resource "aws_vpc_security_group_egress_rule" "this" {
 resource "aws_vpc_security_group_ingress_rule" "this" {
   security_group_id = aws_security_group.this.id
 
-  cidr_ipv4   = module.vpc.vpc_id
+  cidr_ipv4   = module.vpc.vpc_cidr_block
   from_port   = -1
   ip_protocol = -1
   to_port     = -1
