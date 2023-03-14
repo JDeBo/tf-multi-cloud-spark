@@ -45,14 +45,14 @@ module "emr_instance_fleet" {
           },
 
         },
+      ],
+      "Properties" : {}
+    },
         { "Classification" : "spark-defaults",
           "Properties" : {
             "spark.driver.memoryOverhead" : "2048",
           "spark.executor.memoryOverhead" : "2048" }
         }
-      ],
-      "Properties" : {}
-    }
   ])
 
   master_instance_fleet = {
