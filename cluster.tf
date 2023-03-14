@@ -57,10 +57,11 @@ module "emr_instance_fleet" {
 
   master_instance_fleet = {
     name                      = "master-fleet"
-    target_on_demand_capacity = 1
+    target_on_demand_capacity = 0
+    target_spot_capacity      = 1
     instance_type_configs = [
       {
-        instance_type = "m5.xlarge"
+        instance_type = "m4.large"
       }
     ]
   }
