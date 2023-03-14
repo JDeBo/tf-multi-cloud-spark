@@ -21,7 +21,7 @@ module "emr_instance_fleet" {
       prefix = "emr-6"
     }
   }
-  applications = ["spark", "hive", "hadoop", "jupyterhub"]
+  applications = ["spark", "hive", "hadoop", "hue", "jupyterhub"]
   auto_termination_policy = {
     idle_timeout = 3600
   }
@@ -42,7 +42,13 @@ module "emr_instance_fleet" {
           "Classification" : "export",
           "Properties" : {
             "JAVA_HOME" : "/usr/lib/jvm/java-1.8.0"
-          }
+          },
+
+        },
+        { "Classification" : "spark-defaults",
+          "Properties" : {
+            "spark.driver.memoryOverhead" : "2048",
+          "spark.executor.memoryOverhead" : "2048" }
         }
       ],
       "Properties" : {}
