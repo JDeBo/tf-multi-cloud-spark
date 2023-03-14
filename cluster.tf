@@ -21,7 +21,7 @@ module "emr_instance_fleet" {
       prefix = "emr-6"
     }
   }
-  applications = ["spark", "hive", "hadoop", "hue", "jupyterhub"]
+  applications = ["spark", "hive", "hadoop", "hue", "jupyterhub", "JupyterEnterpriseGateway"]
   auto_termination_policy = {
     idle_timeout = 3600
   }
