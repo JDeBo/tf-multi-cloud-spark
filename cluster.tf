@@ -72,7 +72,7 @@ module "emr_instance_fleet" {
   core_instance_fleet = {
     name                      = "core-fleet"
     target_on_demand_capacity = 0
-    target_spot_capacity      = 2
+    target_spot_capacity      = 1
     instance_type_configs = [
       {
         bid_price_as_percentage_of_on_demand_price = 100
@@ -103,7 +103,7 @@ module "emr_instance_fleet" {
   task_instance_fleet = {
     name                      = "task-fleet"
     target_on_demand_capacity = 0
-    target_spot_capacity      = 2
+    target_spot_capacity      = 1
     instance_type_configs = [
       {
         bid_price_as_percentage_of_on_demand_price = 100
