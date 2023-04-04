@@ -7,7 +7,7 @@ resource "aws_docdb_cluster_instance" "cluster_instances" {
 resource "aws_docdb_cluster" "this" {
   cluster_identifier = "mba-docdb-cluster"
   db_subnet_group_name = aws_docdb_subnet_group.this.name
-  master_username    = "mba-admin"
+  master_username    = "mbaadmin"
   master_password    = random_password.docdb_pass.result
 }
 
